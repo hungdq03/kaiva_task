@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {AuthModel} from './_models'
+import { AUTH_LOCAL_STORAGE_KEY, AuthModel } from "../../../types/auth"
+const API_URL = import.meta.env.VITE_APP_API_URL;
 
-const AUTH_LOCAL_STORAGE_KEY = 'kt-auth-react-v'
+
 const getAuth = (): AuthModel | undefined => {
   if (!localStorage) {
     return
@@ -51,11 +52,13 @@ const removeAuth = () => {
 export function setupAxios(axios: any) {
   axios.defaults.headers.Accept = 'application/json'
   axios.interceptors.request.use(
-    (config: {headers: {Authorization: string}}) => {
+    (config: { headers: { Authorization: string }, baseURL: string }) => {
       const auth = getAuth()
-      if (auth && auth.api_token) {
-        config.headers.Authorization = `Bearer ${auth.api_token}`
+      if (auth && auth.access_token) {
+        config.headers.Authorization = `Bearer ${auth.access_token}`
       }
+
+      config.baseURL = API_URL
 
       return config
     },
