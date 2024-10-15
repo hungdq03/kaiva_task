@@ -1,4 +1,5 @@
-export * from './core/_models'
+export * from '../../types/user'
+export * from '../../types/auth'
 export * from './core/Auth'
 export * from './core/AuthHelpers'
 export * from './AuthPage'

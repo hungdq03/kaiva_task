@@ -1,10 +1,12 @@
 /* eslint-disable react-refresh/only-export-components */
 import {FC, useState, useEffect, createContext, useContext, Dispatch, SetStateAction} from 'react'
-import {LayoutSplashScreen} from '../../../../_metronic/layout/core'
-import {AuthModel, UserModel} from './_models'
+import { LayoutSplashScreen } from '../../../../_metronic/layout/core'
 import * as authHelper from './AuthHelpers'
-import {getUserByToken} from './_requests'
 import {WithChildren} from '../../../../_metronic/helpers'
+import { AuthModel } from '../../../types/auth'
+import { UserModel } from '../../../types/user'
+import { getCurrentUserAPI } from '../../../api/user'
+import { logoutAPI } from '../../../api/auth'
 
 type AuthContextProps = {
   auth: AuthModel | undefined
@@ -40,7 +42,8 @@ const AuthProvider: FC<WithChildren> = ({children}) => {
     }
   }
 
-  const logout = () => {
+  const logout = async () => {
+    await logoutAPI();
     saveAuth(undefined)
     setCurrentUser(undefined)
   }
@@ -56,12 +59,12 @@ const AuthInit: FC<WithChildren> = ({children}) => {
   const {auth, currentUser, logout, setCurrentUser} = useAuth()
   const [showSplashScreen, setShowSplashScreen] = useState(true)
 
-  // We should request user by authToken (IN OUR EXAMPLE IT'S API_TOKEN) before rendering the application
+  // We should request user by authToken (IN OUR EXAMPLE IT'S access_token) before rendering the application
   useEffect(() => {
-    const requestUser = async (apiToken: string) => {
+    const requestUser = async () => {
       try {
         if (!currentUser) {
-          const {data} = await getUserByToken(apiToken)
+          const { data } = await getCurrentUserAPI()
           if (data) {
             setCurrentUser(data)
           }
@@ -76,8 +79,8 @@ const AuthInit: FC<WithChildren> = ({children}) => {
       }
     }
 
-    if (auth && auth.api_token) {
-      requestUser(auth.api_token)
+    if (auth && auth.access_token) {
+      requestUser()
     } else {
       logout()
       setShowSplashScreen(false)
